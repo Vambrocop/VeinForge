@@ -31,6 +31,20 @@
 已有工具、深度学习参考、经典算法积木、前沿方向与方法学基础，见
 [`docs/related-work.md`](docs/related-work.md)。
 
----
+## 快速开始（P1）
 
-*设计文档（spec）将在方向确认后加入 `docs/`。*
+```bash
+pip install -e ".[dev]"          # 安装；GUI: pip install -e ".[gui]"
+pytest -q                        # 跑测试（合成脉图验证）
+veinforge run ./tiles --pixel-size-um 1.23 --out results
+veinforge view ./tiles/example.tif   # napari 查看分割
+```
+
+输出：`results/results.csv`、`samples_summary.csv`、`qc/*_overlay.png`、`params.yaml`、`veinforge.db`。
+开发样图：`python scripts/fetch_dev_samples.py`（写入 gitignored `data/dev-samples/`）。
+
+## 文档
+
+- 设计规格：[`docs/specs/2026-06-14-veinforge-mvp-design.md`](docs/specs/2026-06-14-veinforge-mvp-design.md)
+- 实现计划：[`docs/plans/2026-06-14-veinforge-p1-mvp.md`](docs/plans/2026-06-14-veinforge-p1-mvp.md)
+- 参考与数据集：[`docs/related-work.md`](docs/related-work.md)
