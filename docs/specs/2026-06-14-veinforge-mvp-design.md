@@ -95,11 +95,16 @@ class VeinSegmenter(Protocol):
 | 脉宽（直径）| 骨架处 2×EDT 的均值/中位数 | µm |
 | 自由末端密度 | 内部骨架端点数 / 有效面积 | mm⁻² |
 | areole 数/面积 | 内部连通背景域计数 / 均面积 | 个；µm² |
-| 脉间距 | 背景 EDT 极大×2 的均值（近似）| µm |
+| 脉间距 (interveinal dist.) | **距离图法**：对"背景→最近脉"的 EDT 取**对数分布的众数 (mode)**（*How dense can you be?*, *Appl. Plant Sci.* 2023 的稳健估计量），优于单纯均值；与 VLA 高度相关 | µm |
 | 脉面积占比 | 掩膜面积 / 图像面积 | — |
 | 总脉长、图像面积 | 中间量（便于复核）| mm；mm² |
 
 > P1 不区分脉级/方向，自由末端密度分母用**总图像面积**（protocol 中需扣 2° 脉面积——该精化属 P1.5）。
+
+**方法依据（文献，非闭门造车）**
+- **脉密度 / 脉间距**：除经典 VLA = 脉长/面积外，采用 *How dense can you be? New automatic measures of vein density*（*Appl. Plant Sci.*, 2023）的**距离图众数**与 **areole 面积分布**作为更稳健的脉密度估计量（三种测度 areole 面积分布 / sizing transform / distance map 互为交叉验证，附开源代码）。<https://pubmed.ncbi.nlm.nih.gov/37915435/>
+- **自由末端 / areole / 分段脉宽**：算子选择与 **phenoVein**（2015）一致——自由末端 = 骨架图端点、areole = 连通背景域面积、脉宽 = 骨架处距离变换。<https://academic.oup.com/plphys/article/169/4/2359/6114117>
+- **验收基准**：GrasVIQ 报告对人工的准确度 **纵脉 ~95% / 横脉 ~92%**，作为单子叶分割验收门槛参照。<https://pubmed.ncbi.nlm.nih.gov/33914380/>
 
 ---
 
