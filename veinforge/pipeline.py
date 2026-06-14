@@ -23,6 +23,8 @@ def process_image(path, params: Params, segmenter=None) -> dict:
     sk = skeleton_metrics(mask, px_um)
     traits = measure(mask, px_um)
     md = parse_metadata(Path(path).name, params.filename_pattern)
+    md.setdefault("sample_id", Path(path).stem)   # fall back to filename when pattern doesn't match
+    md.setdefault("position", None)
     row = {**md, "path": str(path), "pixel_size_um": px_um,
            "width_px": meta["width_px"], "height_px": meta["height_px"], **traits}
     row["_image"] = image
