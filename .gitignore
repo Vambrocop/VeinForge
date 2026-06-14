@@ -1,7 +1,10 @@
 # Image data & results (kept out of the code repo — see docs/specs)
 data/
 results/
+results_demo/
+models/
 *.db
+*.joblib
 qc/
 
 # Python

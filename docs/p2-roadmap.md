@@ -75,6 +75,24 @@ process_folder("tiles", Params(pixel_size_um=1.23), "results",
 
 > 这块**比 DL 省数据**，也是本项目**真正的发表新意**——多数已有工具只"量脉"，很少把脉性状接到胁迫响应上。
 
+### 已实现（现在就能用）
+
+```bash
+pip install -e ".[stress]"                                        # 装 scikit-learn（很轻）
+veinforge stress compare results/results.csv --label treatment    # 不训练：看哪些脉性状随胁迫显著变化
+veinforge stress train   results/results.csv --label treatment --out models/stress_rf.joblib
+veinforge stress predict new.csv --model models/stress_rf.joblib --out preds.csv
+```
+
+> 合成 demo 实测：`compare` 正确挑出 **vein_density (p≈5e-11)** 与 **interveinal_distance (p≈9e-10)** 随胁迫显著变化；`train` 随机森林交叉验证 **≈98%** 区分对照/胁迫。（数据为合成，流程真实；真实结论待你的胁迫/对照样本。）
+
+### 分割后端可切换（所有选项都留着）
+
+```bash
+veinforge run tiles --segmenter classical                          # 不训练（默认）
+veinforge run tiles --segmenter dl --model models/barley_unet.pt   # 训练好的 DL
+```
+
 ---
 
 ## 阶段小结
@@ -83,4 +101,4 @@ process_folder("tiles", Params(pixel_size_um=1.23), "results",
 |---|---|---|---|---|
 | P1 | 经典 CV 量叶脉 | 否 | 无 | ✅ 完成 |
 | P2-a | DL 分割(U-Net) | 是 | 开放双子叶(预训练)+你的小麦/大麦(微调) | 🧰 框架就绪，待数据 |
-| P2-b | 热胁迫表型 | 轻量 | 胁迫/对照分组样本 | 🧰 在 P1 输出上做，待数据 |
+| P2-b | 热胁迫表型 | 轻量 | 胁迫/对照分组样本 | ✅ 已实现（compare 不训练 / RF 训练），待真实数据验证 |
