@@ -59,6 +59,28 @@ process_folder("tiles", Params(pixel_size_um=1.23), "results",
 
 数据目录：`data/<set>/images/*.png` 与 `data/<set>/masks/*.png`(同名，掩膜 >127 为脉)。
 
+### ✅ 无需人工标注的验证（已跑通）
+
+不依赖你的数据、也不需要任何人工标注，用**合成脉图(掩膜免费、完美)**把整条 DL 链路验证过了：
+
+```bash
+python scripts/make_synth_pretrain.py --n 48 --size 128 --out data/pretrain_synth
+pip install -e ".[dl]"
+python scripts/train_dl.py --data data/pretrain_synth --epochs 10 --out models/synth_unet.pt
+```
+
+结果：训练损失 **0.71 → 0.11** 稳定下降；用 `DLSegmenter` 在**没见过的新合成图**上分割，**IoU = 1.00**。
+说明 `train_dl.py → 存模型 → DLSegmenter 推理` 整条链路正确、即插即用(全程零下载、零人工)。
+
+> ⚠️ 实战注意：DL 模型要在**和推理时同样的预处理**下训练(要么都用原图、要么都过 preprocess)，否则分布不一致会掉点。本 demo 用原图(脉为亮)。
+
+### 真实公共数据的现实（逐个核实过）
+
+- **Zenodo Bornean / LeafVeinCNN**：带人工掩膜，但每个 zip **601MB–1.6GB**、按 plot/tree 编码，需较大下载与整理。
+- **LVD2021**(4977 图、像素脉标注)：需**填表申请**，非直接下载。
+- Roboflow / HuggingFace 上多是**整叶 / 病害**分割，不是脉掩膜。
+- → 暂无"小巧、免登录、可直接下"的真·叶脉掩膜集。上真实数据需接受 ~600MB 下载或走申请。
+
 ---
 
 ## 热胁迫表型：怎么做(P1 输出之上)
