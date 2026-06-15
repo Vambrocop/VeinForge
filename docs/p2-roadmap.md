@@ -93,8 +93,19 @@ python scripts/prep_leafveincnn.py --src data/zenodo/slf_full --out data/zenodo_
 python scripts/train_dl.py --data data/real_train --epochs 40 --out models/real_unet.pt
 ```
 
-- **数据**：44 叶片 → 57 个 ROI 内 tile（按叶片分 46 train / 11 val，无泄漏）。
-- **结果**：训练损失 **0.88 → 0.17**；留出验证 **mean IoU ≈ 0.37**（min 0.11 / max 0.55）。对比图显示**主次脉网络被正确描出**；小训练集 + 真实噪声下 0.37 已证明学到真脉，且预测常比稀疏的人工真值还连续，反而压低 IoU。
+- **数据（可迭代累加）**：下载 SLF + BNTa + DAF2 三个样地 → 65 叶产出 **190 个 ROI 内 tile**（按叶片分 146 train / 44 val，无泄漏）。
+- **结果**：57 tile 时 mean IoU ≈ **0.37**；累加到 190 tile 后 **mean IoU ≈ 0.53**（max 0.79）。对比图显示主次脉网络被**干净描出**，且预测常比稀疏的人工真值还完整（反而压低 IoU 数值）。
+- **可迭代的"下→训→删"循环**（磁盘不涨、底座越攒越强）：
+
+```bash
+# 对每个新样地 <PLOT>（BNTa/DAF2/ESAa/SER/...）：
+curl -L -o data/zenodo/<PLOT>.zip "https://zenodo.org/api/records/4008614/files/<PLOT>-downsampled_images.zip/content"
+python - <<'PY'  # 用 zipfile 抽 _img/_seg/_roi 到 data/zenodo/<PLOT>_full
+PY
+python scripts/prep_leafveincnn.py --src data/zenodo/<PLOT>_full --out data/zenodo_real   # 并入已有 tile
+# 重切 train/val(128px) → 重训 → 删 data/zenodo/<PLOT>*
+python scripts/train_dl.py --data data/real_train --epochs 40 --out models/real_unet.pt
+```
 - **性质**：这是**双子叶通用脉分割**，可作 P2 的**预训练底座**；小麦/大麦仍需你的图微调（`train_dl.py --init models/real_unet.pt`）。
 - 关键点：`_seg` 真值只在 ROI 内有效，故只取**完全落在 ROI 内**的 tile。
 
