@@ -81,6 +81,23 @@ python scripts/train_dl.py --data data/pretrain_synth --epochs 10 --out models/s
 - Roboflow / HuggingFace 上多是**整叶 / 病害**分割，不是脉掩膜。
 - → 暂无"小巧、免登录、可直接下"的真·叶脉掩膜集。上真实数据需接受 ~600MB 下载或走申请。
 
+### ✅ 已在真实公共数据上训练（LeafVeinCNN / Bornean SLF）
+
+下载了 Zenodo SLF 集（601MB），从中抽出**带人工真值的图/脉掩膜**并真训了一把（**全程零人工标注**，掩膜来自数据集）：
+
+```bash
+# 1) 用 zipfile 抽 _img/_seg/_roi 到 data/zenodo/slf_full
+# 2) 抽 ROI 内的「图(反相,脉为亮) <-> 脉掩膜」tile
+python scripts/prep_leafveincnn.py --src data/zenodo/slf_full --out data/zenodo_real
+# 3) 按叶片切 train/val、缩 128px 后训练
+python scripts/train_dl.py --data data/real_train --epochs 40 --out models/real_unet.pt
+```
+
+- **数据**：44 叶片 → 57 个 ROI 内 tile（按叶片分 46 train / 11 val，无泄漏）。
+- **结果**：训练损失 **0.88 → 0.17**；留出验证 **mean IoU ≈ 0.37**（min 0.11 / max 0.55）。对比图显示**主次脉网络被正确描出**；小训练集 + 真实噪声下 0.37 已证明学到真脉，且预测常比稀疏的人工真值还连续，反而压低 IoU。
+- **性质**：这是**双子叶通用脉分割**，可作 P2 的**预训练底座**；小麦/大麦仍需你的图微调（`train_dl.py --init models/real_unet.pt`）。
+- 关键点：`_seg` 真值只在 ROI 内有效，故只取**完全落在 ROI 内**的 tile。
+
 ---
 
 ## 热胁迫表型：怎么做(P1 输出之上)
