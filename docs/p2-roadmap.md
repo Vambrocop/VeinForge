@@ -93,8 +93,9 @@ python scripts/prep_leafveincnn.py --src data/zenodo/slf_full --out data/zenodo_
 python scripts/train_dl.py --data data/real_train --epochs 40 --out models/real_unet.pt
 ```
 
-- **数据（可迭代累加）**：下载 SLF + BNTa + DAF2 三个样地 → 65 叶产出 **190 个 ROI 内 tile**（按叶片分 146 train / 44 val，无泄漏）。
-- **结果**：57 tile 时 mean IoU ≈ **0.37**；累加到 190 tile 后 **mean IoU ≈ 0.53**（max 0.79）。对比图显示主次脉网络被**干净描出**，且预测常比稀疏的人工真值还完整（反而压低 IoU 数值）。
+- **数据（可迭代累加）**：累计下载 SLF+BNTa+DAF2+ESAa+BNTb 五个样地 → 102 叶产出 **312 个 ROI 内 tile**（按叶片分 train/val，无泄漏）。
+- **结果（诚实记录）**：mean IoU 轨迹 **57 tile→0.37 → 190 tile→0.53 → 312 tile→0.48**。**早期加数据增益大，之后进入平台**（边际递减，且全为双子叶）。⚠️ 每轮都重新切 val，val 集大小/构成不同（11→44→95 tile），故跨轮 IoU **非严格可比**；要严谨追踪提升，应固定一个 holdout 集再比。预测常比稀疏的人工真值还完整，也会压低 IoU 数值。
+- **结论**：~190 tile 的双子叶底座已够用作预训练；继续堆双子叶数据收益有限，**真正的跃升靠小麦/大麦微调**。
 - **可迭代的"下→训→删"循环**（磁盘不涨、底座越攒越强）：
 
 ```bash
