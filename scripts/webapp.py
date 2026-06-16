@@ -33,19 +33,33 @@ files = st.file_uploader("脉网图(可多选)", type=["png", "jpg", "jpeg", "ti
                          accept_multiple_files=True)
 
 if files and st.button("分析", type="primary"):
+    if backend.startswith("dl") and not model_path:
+        st.error("选了 DL 后端但没上传模型 .pt —— 请上传模型,或改用 classical(不需模型)。")
+        st.stop()
     seg = get_segmenter("dl" if backend.startswith("dl") else "classical", model_path=model_path)
     params = Params(pixel_size_um=px or None)
     rows = []
+    prog = st.progress(0.0, text="分析中…")
     with tempfile.TemporaryDirectory() as td:
-        for f in files:
+        for j, f in enumerate(files):
             p = Path(td) / f.name
             p.write_bytes(f.getbuffer())
-            row = process_image(p, params, seg)
+            try:
+                row = process_image(p, params, seg)
+            except Exception as exc:                    # skip a bad image, keep going
+                st.warning(f"跳过 {f.name}:{exc}")
+                prog.progress((j + 1) / len(files))
+                continue
             ov = Path(td) / f"{p.stem}_ov.png"
             save_overlay(row.pop("_image"), row.pop("_mask"),
                          row.pop("_skeleton"), row.pop("_endpoints"), ov)
             row["_overlay_img"] = iio.imread(ov)        # read back before temp dir closes
             rows.append(row)
+            prog.progress((j + 1) / len(files), text=f"分析中… {j + 1}/{len(files)}")
+    prog.empty()
+    if not rows:
+        st.warning("没有成功分析的图。")
+        st.stop()
 
     st.subheader("质控叠加图(绿=脉 / 红=骨架 / 黄=末端)")
     cols = st.columns(min(len(rows), 3))
