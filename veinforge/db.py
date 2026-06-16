@@ -18,13 +18,15 @@ CREATE TABLE IF NOT EXISTS measurements(
   vein_density REAL, mean_vein_width_um REAL, median_vein_width_um REAL,
   free_ending_count INTEGER, free_ending_density REAL, areole_count INTEGER,
   areole_mean_area_um2 REAL, interveinal_distance_um REAL, vein_area_fraction REAL,
-  total_vein_length_mm REAL, image_area_mm2 REAL, created_at TEXT);
+  total_vein_length_mm REAL, image_area_mm2 REAL,
+  longitudinal_density REAL, transverse_density REAL, vein_axis_deg REAL, created_at TEXT);
 """
 
 _MEASURE_COLS = ["vein_density", "mean_vein_width_um", "median_vein_width_um",
                  "free_ending_count", "free_ending_density", "areole_count",
                  "areole_mean_area_um2", "interveinal_distance_um", "vein_area_fraction",
-                 "total_vein_length_mm", "image_area_mm2"]
+                 "total_vein_length_mm", "image_area_mm2",
+                 "longitudinal_density", "transverse_density", "vein_axis_deg"]
 
 
 def _now() -> str:

@@ -3,6 +3,7 @@ import numpy as np
 import scipy.ndimage as ndi
 from skimage.measure import label, regionprops
 from veinforge.skeleton import skeleton_metrics
+from veinforge.orient import separate_orientations
 
 
 def _interveinal_distance_um(mask: np.ndarray, pixel_size_um: float) -> float:
@@ -61,6 +62,8 @@ def measure(mask: np.ndarray, pixel_size_um: float | None) -> dict:
     total_length_mm = sk["total_length_mm"]
     vein_density = total_length_mm / image_area_mm2 if image_area_mm2 else 0.0
 
+    ori = separate_orientations(mask, px_um)        # monocot longitudinal vs transverse
+
     return {
         "vein_density": vein_density,
         "mean_vein_width_um": mean_w,
@@ -73,4 +76,7 @@ def measure(mask: np.ndarray, pixel_size_um: float | None) -> dict:
         "vein_area_fraction": float(mask.mean()),
         "total_vein_length_mm": total_length_mm,
         "image_area_mm2": image_area_mm2,
+        "longitudinal_density": ori["longitudinal_density"],
+        "transverse_density": ori["transverse_density"],
+        "vein_axis_deg": ori["axis_deg"],
     }

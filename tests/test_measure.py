@@ -6,6 +6,7 @@ REQUIRED_KEYS = {
     "free_ending_count", "free_ending_density", "areole_count",
     "areole_mean_area_um2", "interveinal_distance_um", "vein_area_fraction",
     "total_vein_length_mm", "image_area_mm2",
+    "longitudinal_density", "transverse_density", "vein_axis_deg",
 }
 
 
