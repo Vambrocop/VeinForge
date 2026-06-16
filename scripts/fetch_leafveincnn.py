@@ -9,6 +9,7 @@ Run (on Colab):  python scripts/fetch_leafveincnn.py            # all plots
 """
 from __future__ import annotations
 import argparse
+import shutil
 import subprocess
 import sys
 import urllib.request
@@ -39,6 +40,7 @@ def main():
         subprocess.run([sys.executable, "scripts/prep_leafveincnn.py",
                         "--src", str(args.raw / plot), "--out", str(args.out)], check=True)
         zp.unlink()                                   # drop the big zip after prepping
+        shutil.rmtree(args.raw / plot, ignore_errors=True)   # and the extracted images
     img_dir = args.out / "images"
     n = len(list(img_dir.glob("*.png"))) if img_dir.exists() else 0
     print(f"done: {n} image/mask tiles -> {args.out}")
