@@ -21,6 +21,21 @@ ALL_PLOTS = ["SLF", "BNTa", "DAF2", "ESAa", "BNTb", "ESAb", "SER", "BSO", "BEL",
 _WANT = ("_img.png", "_seg.png", "_roi.png")
 
 
+def _progress_hook():
+    """urlretrieve reporthook: print download % every ~10% (Jupyter-friendly, no \\r)."""
+    last = [-10]
+
+    def hook(block_num, block_size, total):
+        if total <= 0:
+            return
+        done = block_num * block_size
+        pct = int(done * 100 / total)
+        if pct >= last[0] + 10:
+            last[0] = pct - pct % 10
+            print(f"    {min(pct, 100)}%  ({done / 1e6:.0f}/{total / 1e6:.0f} MB)", flush=True)
+    return hook
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--plots", nargs="+", default=ALL_PLOTS)
@@ -33,7 +48,7 @@ def main():
         zp.parent.mkdir(parents=True, exist_ok=True)
         if not zp.exists():
             print(f"downloading {plot} ...", flush=True)
-            urllib.request.urlretrieve(ZENODO.format(plot=plot), zp)
+            urllib.request.urlretrieve(ZENODO.format(plot=plot), zp, reporthook=_progress_hook())
         with zipfile.ZipFile(zp) as zf:
             members = [n for n in zf.namelist() if n.endswith(_WANT)]
             zf.extractall(args.raw / plot, members=members)
