@@ -35,4 +35,26 @@
 
 ---
 
+## 审核 #2 — v0.2.0(新增模块复审,2026-06-15)
+
+### 范围
+上次审核后新增/改动:leafstress、tiling、webapp、fetch_leafveincnn、split_by_leaf、gui.correct/measure_from_mask、train_dl(clDice/增强/val)、losses、augment、benchmark。
+
+### 总评
+健康,**无 critical**。修 3 个健壮性/兼容项(含回归测试)。
+
+### ✅ 已修
+1. **[健壮性] leafstress 假设 RGB**:灰度图在 `leaf_features` 会出错 → 灰度自动转 3 通道;回归测试 `test_leaf_features_handles_grayscale`。
+2. **[健壮性] train_dl --val 不存模型**:若 val 全 nan(`best` 永远 > 不了 -1),既不按最佳存、又跳过最终存 → 加兜底"无文件则存最终模型"。
+3. **[兼容] webapp 弃用参数**:`st.image(use_column_width=)` 已弃用 → 改 `use_container_width`。
+
+### 🔲 待优化(非阻塞)
+- leafstress/stress 类别极少 / 极不均时 `cross_val` 可能失败 → 加守卫。
+- webapp 选 dl 但未传模型 → 直接报错而非友好提示 → 加 UX 守卫。
+- **webapp 仅语法 + 逻辑(复用已测函数)验证;UI 渲染未实跑**(需 `streamlit run` 在浏览器验)。
+
+### 裁决:通过(改善了健康度)。
+
+---
+
 *每次审核在此加一节;问题→修复→回归测试 三件套齐全才算闭环。*

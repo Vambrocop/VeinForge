@@ -51,7 +51,7 @@ if files and st.button("分析", type="primary"):
     cols = st.columns(min(len(rows), 3))
     for i, r in enumerate(rows):
         cols[i % len(cols)].image(r["_overlay_img"], caption=r.get("sample_id", ""),
-                                  use_column_width=True)
+                                  use_container_width=True)
 
     df = pd.DataFrame([{k: v for k, v in r.items() if not k.startswith("_")} for r in rows])
     st.subheader("性状表")

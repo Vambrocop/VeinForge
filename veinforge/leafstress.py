@@ -17,8 +17,11 @@ _EXTS = {".png", ".jpg", ".jpeg", ".tif", ".tiff"}
 
 
 def leaf_features(rgb: np.ndarray) -> np.ndarray:
-    """Colour + chlorosis/necrosis features from an RGB leaf image."""
-    arr = img_as_float(np.asarray(rgb))[..., :3]
+    """Colour + chlorosis/necrosis features from a leaf image (RGB; grayscale ok)."""
+    arr = img_as_float(np.asarray(rgb))
+    if arr.ndim == 2:                                  # grayscale -> 3 channels
+        arr = np.stack([arr] * 3, axis=-1)
+    arr = arr[..., :3]
     hsv = rgb2hsv(arr)
     feats: list[float] = []
     for ch in range(3):

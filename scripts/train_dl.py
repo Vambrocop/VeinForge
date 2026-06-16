@@ -120,7 +120,7 @@ def main():
                 torch.save(model.state_dict(), args.out)   # keep best-by-val
         print(msg)
 
-    if not args.val:
+    if not args.val or not args.out.exists():          # always leave a model file
         torch.save(model.state_dict(), args.out)
     tag = f"  (best val_iou={best:.3f})" if args.val else ""
     print(f"saved -> {args.out}{tag}  (load with DLSegmenter(model_path=...))")

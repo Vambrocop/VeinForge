@@ -26,3 +26,10 @@ def test_classifier_separates_health_classes():
     assert m["cv_accuracy_mean"] > 0.8
     assert sorted(m["classes"]) == ["healthy", "stressed"]
     assert predict_leaf(model, np.vstack(X[:2])).shape == (2,)
+
+
+def test_leaf_features_handles_grayscale():
+    g = np.random.default_rng(0).random((32, 32)).astype("float32")
+    f_gray = leaf_features(g)
+    f_rgb = leaf_features(np.stack([g, g, g], axis=-1))
+    assert f_gray.shape == f_rgb.shape and f_gray.ndim == 1
