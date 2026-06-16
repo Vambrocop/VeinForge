@@ -83,14 +83,15 @@ def main():
     ap.add_argument("--batch", type=int, default=4)
     ap.add_argument("--lr", type=float, default=1e-3)
     ap.add_argument("--cldice", type=float, default=0.5, help="clDice connectivity weight")
+    ap.add_argument("--base", type=int, default=32, help="U-Net base channels (bigger=more capacity, needs GPU)")
     ap.add_argument("--no-augment", action="store_true", help="disable data augmentation")
     ap.add_argument("--out", type=Path, default=Path("models/unet.pt"))
     ap.add_argument("--init", type=Path, default=None, help="warm-start checkpoint")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"device: {device}  augment={not args.no_augment}  cldice={args.cldice}")
-    model = UNet().to(device)
+    print(f"device: {device}  base={args.base}  augment={not args.no_augment}  cldice={args.cldice}")
+    model = UNet(base=args.base).to(device)
     if args.init and args.init.exists():
         model.load_state_dict(torch.load(args.init, map_location=device))
         print(f"warm-started from {args.init}")
