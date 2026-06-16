@@ -80,6 +80,7 @@ python scripts/benchmark.py        # 在留出真值上算 IoU/Dice/速度,vs Im
 | [p2-roadmap](docs/p2-roadmap.md) | DL 分割 + 胁迫表型路线 |
 | [benchmark](docs/benchmark.md) · [scorecard](docs/scorecard.md) | 多维技术对比 · 项目自评(版本追踪) |
 | [training-plan](docs/training-plan.md) | GPU/数据到位后怎么优化训练 |
+| [colab-gpu](docs/colab-gpu.md) | 免费云 GPU(Colab/Kaggle)训练配方 |
 | [backlog](docs/backlog.md) · [ideas](docs/ideas.md) · [audit-log](docs/audit-log.md) | 缺口日志 · 点子日志 · 代码审核日志 |
 | [related-work](docs/related-work.md) | 参考工具/数据集 |
 
