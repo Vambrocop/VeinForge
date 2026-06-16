@@ -20,9 +20,10 @@ st.caption("上传透明化脉网图 → 自动量化叶脉性状 + 质控叠加
 c1, c2 = st.columns(2)
 px = c1.number_input("像素尺寸 µm/px (0 = 未标定)", value=2.0, min_value=0.0, step=0.1)
 backend = c2.selectbox("分割后端", ["classical (不训练)", "dl (需模型)"])
+is_dl = backend.startswith("dl")
 
 model_path = None
-if backend.startswith("dl"):
+if is_dl:
     mf = st.file_uploader("DL 模型 .pt", type=["pt"])
     if mf is not None:
         mp = Path(tempfile.gettempdir()) / "vf_model.pt"
@@ -33,10 +34,10 @@ files = st.file_uploader("脉网图(可多选)", type=["png", "jpg", "jpeg", "ti
                          accept_multiple_files=True)
 
 if files and st.button("分析", type="primary"):
-    if backend.startswith("dl") and not model_path:
+    if is_dl and not model_path:
         st.error("选了 DL 后端但没上传模型 .pt —— 请上传模型,或改用 classical(不需模型)。")
         st.stop()
-    seg = get_segmenter("dl" if backend.startswith("dl") else "classical", model_path=model_path)
+    seg = get_segmenter("dl" if is_dl else "classical", model_path=model_path)
     params = Params(pixel_size_um=px or None)
     rows = []
     prog = st.progress(0.0, text="分析中…")
