@@ -38,6 +38,7 @@
 | v0.1.3 | 2026-06-15 | 7.8 | 性能:高斯背景替 rank.mean、orient 复用骨架(去双重);清理冗余实验模型;README 使用指南。|
 | v0.1.4 | 2026-06-15 | 8.0 | 原分辨率 tiling(--tile-size)+ Colab GPU 配方 + Streamlit 网页 GUI + napari 人工校正 → **可用性 6→8、准确度路径打通**。|
 | **v0.2.0** | 2026-06-15 | 8.0 | 正式升 minor:特性完备的 **pre-1.0**(经典CV + 叶脉/整叶两条胁迫轨 + DL训练 + tiling + 网页/napari + MIT 开源 + 重训指南,51 测试)。**1.0 待真实小麦/大麦验证。** |
+| v0.2.1 | 2026-06-15 | 8.1 | 免费 Colab GPU 训出**强通用底座**(SLF+BNTa+DAF2+ESAa,246 tile,256px,100 轮)→ Colab 留出验证 **val_iou 0.715**(↑ 本地 CPU 0.66);模型 `models/leafvein_base.pt`(local)。|
 
 ---
 
