@@ -49,3 +49,50 @@ def make_vein_phantom(
         "pixel_size_um": pixel_size_um,
     }
     return image, mask, truth
+
+
+def make_realistic_phantom(size: int = 256, pixel_size_um: float = 2.0,
+                           n_longitudinal: int = 7, seed: int = 0, noise: float = 0.05):
+    """Monocot-style phantom for DL pretraining: wavy longitudinal veins of varying
+    width + transverse connectors, with uneven illumination, staining blotches, noise
+    and a slight blur. More realistic than the clean grid. Veins are BRIGHT.
+
+    Returns (image float[0,1], mask bool, truth dict).
+    """
+    from skimage.filters import gaussian
+
+    rng = np.random.default_rng(seed)
+    mask = np.zeros((size, size), dtype=bool)
+    rows = np.arange(size)
+    xs = np.linspace(size * 0.08, size * 0.92, n_longitudinal)
+
+    for x0 in xs:                                       # wavy longitudinal veins
+        amp = rng.uniform(0.01, 0.05) * size
+        freq = rng.uniform(1.0, 3.0) * 2 * np.pi / size
+        phase = rng.uniform(0, 2 * np.pi)
+        cols = x0 + amp * np.sin(freq * rows + phase)
+        half = int(rng.integers(1, 3))                  # varying width
+        for r, cc in zip(rows, cols):
+            c = int(round(cc))
+            mask[r, max(c - half, 0):min(c + half + 1, size)] = True
+
+    for i in range(len(xs) - 1):                        # transverse connectors
+        for _ in range(int(rng.integers(3, 8))):
+            y = int(rng.integers(2, size - 2))
+            c0, c1 = int(round(xs[i])), int(round(xs[i + 1]))
+            mask[y:y + 1, min(c0, c1):max(c0, c1) + 1] = True
+
+    illum = np.linspace(rng.uniform(0.2, 0.35), rng.uniform(0.3, 0.45), size)[:, None]
+    img = illum + noise * rng.standard_normal((size, size))
+    for _ in range(int(rng.integers(2, 6))):            # staining blotches
+        yb, xb = rng.integers(0, size, 2)
+        rb = int(rng.integers(size // 12, size // 5))
+        yy, xx = np.ogrid[:size, :size]
+        img[(yy - yb) ** 2 + (xx - xb) ** 2 < rb ** 2] += rng.uniform(-0.1, 0.1)
+    img[mask] = 0.8 + noise * rng.standard_normal(int(mask.sum()))
+    img = gaussian(np.clip(img, 0.0, 1.0), sigma=float(rng.uniform(0.5, 1.0)))
+    img = np.clip(img, 0.0, 1.0)
+
+    truth = {"vein_area_fraction": float(mask.mean()),
+             "n_longitudinal": n_longitudinal, "pixel_size_um": pixel_size_um}
+    return img, mask, truth

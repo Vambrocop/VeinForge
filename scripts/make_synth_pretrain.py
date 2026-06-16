@@ -9,7 +9,7 @@ import argparse
 from pathlib import Path
 import numpy as np
 import imageio.v3 as iio
-from veinforge.synthetic import make_vein_phantom
+from veinforge.synthetic import make_vein_phantom, make_realistic_phantom
 
 
 def main():
@@ -18,19 +18,25 @@ def main():
     ap.add_argument("--size", type=int, default=128)
     ap.add_argument("--out", type=Path, default=Path("data/pretrain_synth"))
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--style", choices=["grid", "realistic"], default="realistic",
+                    help="grid = clean lines; realistic = wavy veins + illumination/noise/blur")
     args = ap.parse_args()
 
     (args.out / "images").mkdir(parents=True, exist_ok=True)
     (args.out / "masks").mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(args.seed)
     for i in range(args.n):
-        img, mask, _ = make_vein_phantom(
-            size=args.size,
-            n_longitudinal=int(rng.integers(5, 12)),
-            n_transverse=int(rng.integers(5, 12)),
-            width_px=int(rng.integers(2, 5)),
-            noise=float(rng.uniform(0.02, 0.06)),
-        )
+        if args.style == "realistic":
+            img, mask, _ = make_realistic_phantom(
+                size=args.size, n_longitudinal=int(rng.integers(5, 12)), seed=args.seed + i)
+        else:
+            img, mask, _ = make_vein_phantom(
+                size=args.size,
+                n_longitudinal=int(rng.integers(5, 12)),
+                n_transverse=int(rng.integers(5, 12)),
+                width_px=int(rng.integers(2, 5)),
+                noise=float(rng.uniform(0.02, 0.06)),
+            )
         name = f"phantom_{i:03d}.png"
         iio.imwrite(args.out / "images" / name, (img * 255).astype("uint8"))
         iio.imwrite(args.out / "masks" / name, (mask * 255).astype("uint8"))
