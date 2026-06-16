@@ -18,6 +18,7 @@ def run(
     out: Path = typer.Option(Path("results"), help="Output directory"),
     invert: bool = typer.Option(True, help="Invert so veins become bright"),
     background_radius: int = typer.Option(50, help="Rolling-ball radius px; 0 disables"),
+    tile_size: int = typer.Option(0, help="Segment large images in full-res tiles of this size; 0=whole"),
     segmenter: str = typer.Option("classical", help="'classical' (no training) or 'dl' (trained)"),
     model: Path = typer.Option(None, help="DL checkpoint path when --segmenter dl"),
 ):
@@ -27,7 +28,8 @@ def run(
                    "unless image calibration is found.")
     from veinforge.segment import get_segmenter
     seg = get_segmenter(segmenter, model_path=model)
-    params = Params(pixel_size_um=pixel_size_um, invert=invert, background_radius=background_radius)
+    params = Params(pixel_size_um=pixel_size_um, invert=invert,
+                    background_radius=background_radius, tile_size=tile_size)
     rows = process_folder(folder, params, out, segmenter=seg)
     typer.echo(f"Processed {len(rows)} image(s) with '{segmenter}' segmenter -> {out}")
 

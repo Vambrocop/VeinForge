@@ -17,6 +17,8 @@ class Params:
     hysteresis_high: float = 0.25
     min_object_px: int = 64                      # remove specks smaller than this
     closing_radius: int = 1                      # morphological closing radius (px)
+    tile_size: int = 0                           # >0: segment large images in full-res tiles
+    tile_overlap: int = 32                       # tile overlap (px)
     filename_pattern: str = (
         r"(?P<sample_id>[^_]+)_(?P<treatment>[^_]+)_(?P<replicate>[^_]+)_(?P<position>[^_.]+)"
     )

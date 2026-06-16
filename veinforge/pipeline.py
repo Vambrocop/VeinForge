@@ -6,6 +6,7 @@ from veinforge.params import Params
 from veinforge.io import load_image, parse_metadata
 from veinforge.preprocess import preprocess
 from veinforge.segment.classical import ClassicalSegmenter
+from veinforge.tiling import segment_large
 from veinforge.skeleton import skeleton_metrics
 from veinforge.measure import measure
 from veinforge import db as dbmod
@@ -19,7 +20,7 @@ def process_image(path, params: Params, segmenter=None) -> dict:
     image, meta = load_image(path)
     px_um = params.pixel_size_um if params.pixel_size_um is not None else meta["pixel_size_um"]
     pre = preprocess(image, params)
-    mask = segmenter.segment(pre, params)
+    mask = segment_large(pre, segmenter, params)   # tiles large images at full res if tile_size>0
     sk = skeleton_metrics(mask, px_um)
     traits = measure(mask, px_um)
     md = parse_metadata(Path(path).name, params.filename_pattern)
