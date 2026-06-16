@@ -31,3 +31,30 @@ def view(path: str | Path) -> None:                # pragma: no cover (interacti
         else:
             viewer.add_labels(layer["data"], name=layer["name"])
     napari.run()
+
+
+def measure_from_mask(mask: np.ndarray, pixel_size_um=None) -> dict:
+    """Re-run trait measurement on a (possibly hand-corrected) boolean mask."""
+    from veinforge.measure import measure
+    return measure(np.asarray(mask).astype(bool), pixel_size_um)
+
+
+def correct(path, out_mask) -> None:               # pragma: no cover (interactive)
+    """Open napari to hand-correct the vein mask, then save it on window close."""
+    import napari
+    import imageio.v3 as iio
+    from veinforge.params import Params
+    from veinforge.io import load_image
+    from veinforge.preprocess import preprocess
+    from veinforge.segment.classical import ClassicalSegmenter
+
+    image, _ = load_image(path)
+    params = Params()
+    mask = ClassicalSegmenter().segment(preprocess(image, params), params)
+    viewer = napari.Viewer()
+    viewer.add_image(image, name="image")
+    lbl = viewer.add_labels(mask.astype(np.uint8), name="vein mask (paint to correct)")
+    print("用画笔在 'vein mask' 图层上修正,改完关闭窗口即保存。")
+    napari.run()
+    iio.imwrite(out_mask, ((np.asarray(lbl.data) > 0) * 255).astype(np.uint8))
+    print(f"saved corrected mask -> {out_mask}")

@@ -70,6 +70,12 @@ python scripts/train_dl.py --data data/train --val data/val --epochs 50 --out mo
 python scripts/benchmark.py        # 在留出真值上算 IoU/Dice/速度,vs ImageJ/GrasVIQ 参照
 ```
 
+### 7) 网页 GUI(给非专家)& napari 人工校正
+```bash
+pip install -e ".[web]" && streamlit run scripts/webapp.py    # 浏览器:拖图→出性状表+质控图→下载 CSV
+veinforge correct leaf.tif --out mask.png                      # napari 画笔修正掩膜,关窗即保存
+```
+
 ---
 
 ## 文档(都在 [`docs/`](docs/))

@@ -41,6 +41,14 @@ def view(image: Path = typer.Argument(..., help="One image to inspect in napari"
     gui_view(image)
 
 
+@app.command()
+def correct(image: Path = typer.Argument(..., help="Image to hand-correct in napari"),
+            out: Path = typer.Option(Path("corrected_mask.png"), help="Where to save the mask")):
+    """Hand-correct a vein mask in napari (paint), saved on window close."""
+    from veinforge.gui import correct as gui_correct
+    gui_correct(image, out)
+
+
 @stress_app.command("compare")
 def stress_compare(csv: Path = typer.Argument(..., help="results.csv with a group-label column"),
                    label: str = typer.Option("treatment", help="grouping column")):
