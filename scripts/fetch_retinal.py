@@ -23,6 +23,8 @@ def _prep(img_path: Path, ann_path: Path, out_dir: Path) -> None:
     inv = (inv - inv.min()) / (np.ptp(inv) + 1e-6) * 255.0
     im = Image.fromarray(inv.astype("uint8")).resize((SIZE, SIZE), Image.BILINEAR)
     ann = np.asarray(Image.open(ann_path).convert("L")) > 0
+    if ann.mean() > 0.5:                                 # STARE encoding varies; vessels
+        ann = ~ann                                       # are always the minority class
     m = Image.fromarray((ann * 255).astype("uint8")).resize((SIZE, SIZE), Image.NEAREST)
     (out_dir / "images").mkdir(parents=True, exist_ok=True)
     (out_dir / "masks").mkdir(parents=True, exist_ok=True)
