@@ -15,8 +15,8 @@
    → try/except 优雅降级(脉长退回像素计数 / 方向退回 NaN);回归测试 `test_skeleton_ring_no_crash`。
 
 ### 🔲 已记录待优化(Consider / Optional,非阻塞)
-- **[性能]** `preprocess` 用 `rank.mean(disk(50))` 在 4000px 大图上慢 → 改高斯背景或降采样估计。
-- **[性能]** `measure` 与 `orient` 各自 skeletonize + skan 一次(双重计算)→ 可共享骨架。
+- ✅ **[性能,已修 v0.1.3]** `preprocess` 改用高斯背景(替 `rank.mean(disk)`),大图快得多。
+- ✅ **[性能,已修 v0.1.3]** `orient` 复用 `measure` 已算的骨架(去掉一次 skeletonize)。
 - **[健壮性]** `segment` 在全空/常值图上 `threshold_otsu` 可能报错 → 加守卫。
 - **[健壮性]** `stress` 训练样本极少 / 类别极不均时 `cross_val` 可能失败 → 加守卫。
 - **[边界]** `io` 的 `ResolutionUnit==1`(无单位)被当作 cm → 加判断。

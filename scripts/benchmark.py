@@ -16,7 +16,7 @@ from veinforge.benchmark import iou, dice
 
 # dataset label -> (val dir, in-domain DL checkpoint)
 DATASETS = {
-    "leaf (LeafVeinCNN val)": ("data/real_val", "models/real_unet.pt"),
+    "leaf (LeafVeinCNN val)": ("data/real_val", "models/leaf_unet.pt"),
     "retina (STARE val)": ("data/retinal/val", "models/retinal_unet.pt"),
 }
 

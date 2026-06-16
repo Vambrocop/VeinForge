@@ -29,14 +29,18 @@ def _circ_dist(a: float, b: float) -> float:
 
 
 def separate_orientations(mask: np.ndarray, pixel_size_um: float | None = None,
-                          axis_deg: float | None = None, tol_deg: float = 35.0) -> dict:
-    """Split a vein mask into longitudinal/transverse classes and their densities."""
+                          axis_deg: float | None = None, tol_deg: float = 35.0,
+                          skeleton: np.ndarray | None = None) -> dict:
+    """Split a vein mask into longitudinal/transverse classes and their densities.
+
+    Pass a precomputed `skeleton` to avoid re-skeletonizing (e.g. from measure()).
+    """
     px_mm = (pixel_size_um or 1000.0) / 1000.0
     area_mm2 = mask.size * px_mm * px_mm
     long_mask = np.zeros(mask.shape, dtype=bool)
     trans_mask = np.zeros(mask.shape, dtype=bool)
 
-    skel = skeletonize(mask)
+    skel = skeletonize(mask) if skeleton is None else skeleton
     degenerate = {"axis_deg": float("nan"), "longitudinal_density": 0.0,
                   "transverse_density": 0.0, "longitudinal_mask": long_mask,
                   "transverse_mask": trans_mask}

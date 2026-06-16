@@ -62,7 +62,7 @@ def measure(mask: np.ndarray, pixel_size_um: float | None) -> dict:
     total_length_mm = sk["total_length_mm"]
     vein_density = total_length_mm / image_area_mm2 if image_area_mm2 else 0.0
 
-    ori = separate_orientations(mask, px_um)        # monocot longitudinal vs transverse
+    ori = separate_orientations(mask, px_um, skeleton=skel)   # reuse skeleton; monocot long/trans
 
     return {
         "vein_density": vein_density,
