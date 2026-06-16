@@ -7,6 +7,8 @@ from veinforge.pipeline import process_folder
 app = typer.Typer(add_completion=False, help="VeinForge — leaf-vein trait quantification")
 stress_app = typer.Typer(help="Stress phenotyping from vein traits (P2-b)")
 app.add_typer(stress_app, name="stress")
+leaf_app = typer.Typer(help="Whole-leaf RGB stress/health classification")
+app.add_typer(leaf_app, name="leafstress")
 
 
 @app.command()
@@ -68,6 +70,29 @@ def stress_predict(csv: Path = typer.Argument(...), model: Path = typer.Option(.
     df["predicted"] = predict_stress(load_model(model), df)
     df.to_csv(out, index=False)
     typer.echo(f"wrote {out}")
+
+
+@leaf_app.command("train")
+def leafstress_train(folder: Path = typer.Argument(..., help="<root>/<class>/*.jpg layout"),
+                     out: Path = typer.Option(Path("models/leaf_clf.joblib"))):
+    """Train a RandomForest health/stress classifier on whole-leaf photos."""
+    from veinforge.leafstress import load_folder, train_leaf_classifier
+    from veinforge.stress import save_model
+    X, y = load_folder(folder)
+    model, m = train_leaf_classifier(X, y)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    save_model(model, out)
+    typer.echo(f"classes={m['classes']} cv_acc={m['cv_accuracy_mean']:.3f} (n={m['n_samples']}) -> {out}")
+
+
+@leaf_app.command("predict")
+def leafstress_predict(image: Path = typer.Argument(...), model: Path = typer.Option(...)):
+    """Predict health/stress class for one leaf photo."""
+    import imageio.v3 as iio
+    from veinforge.leafstress import leaf_features, predict_leaf
+    from veinforge.stress import load_model
+    pred = predict_leaf(load_model(model), leaf_features(iio.imread(image))[None])
+    typer.echo(str(pred[0]))
 
 
 if __name__ == "__main__":
