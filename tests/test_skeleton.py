@@ -19,3 +19,12 @@ def test_skeleton_counts_a_single_free_end():
     mask[32, 10:40] = True
     m = skeleton_metrics(mask, pixel_size_um=1.0)
     assert m["n_endpoints"] == 2
+
+
+def test_skeleton_ring_no_crash():
+    # a closed loop has no endpoints and can make skan raise; must degrade gracefully
+    yy, xx = np.ogrid[:64, :64]
+    r = np.sqrt((yy - 32) ** 2 + (xx - 32) ** 2)
+    mask = (r > 10) & (r < 15)
+    m = skeleton_metrics(mask, pixel_size_um=1.0)
+    assert m["total_length_mm"] >= 0.0 and m["skeleton"].dtype == bool

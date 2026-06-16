@@ -30,3 +30,10 @@ def test_dump_params_and_overlay(tmp_path):
     out = tmp_path / "overlay.png"
     save_overlay(img, mask, skel, eps, out)
     assert out.exists()
+
+
+def test_write_summary_empty_no_crash(tmp_path):
+    # empty result set (e.g. folder with no images) must not raise
+    p = tmp_path / "summary.csv"
+    write_summary([], p)
+    assert p.exists()

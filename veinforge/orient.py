@@ -37,36 +37,40 @@ def separate_orientations(mask: np.ndarray, pixel_size_um: float | None = None,
     trans_mask = np.zeros(mask.shape, dtype=bool)
 
     skel = skeletonize(mask)
+    degenerate = {"axis_deg": float("nan"), "longitudinal_density": 0.0,
+                  "transverse_density": 0.0, "longitudinal_mask": long_mask,
+                  "transverse_mask": trans_mask}
     if skel.sum() < 2:
-        return {"axis_deg": float("nan"), "longitudinal_density": 0.0,
-                "transverse_density": 0.0, "longitudinal_mask": long_mask,
-                "transverse_mask": trans_mask}
+        return degenerate
 
-    sk = Skeleton(skel.astype(np.uint8), spacing=1)
-    lengths_px = sk.path_lengths()
-    angles, coords = [], []
-    for i in range(sk.n_paths):
-        c = sk.path_coordinates(i)
-        angles.append(_path_angle(c))
-        coords.append(c)
+    try:
+        sk = Skeleton(skel.astype(np.uint8), spacing=1)
+        lengths_px = sk.path_lengths()
+        angles, coords = [], []
+        for i in range(sk.n_paths):
+            c = sk.path_coordinates(i)
+            angles.append(_path_angle(c))
+            coords.append(c)
 
-    # Dominant axis = length-weighted circular mean of doubled angles.
-    if axis_deg is None:
-        vec = sum(L * np.exp(2j * np.radians(a))
-                  for a, L in zip(angles, lengths_px) if a is not None)
-        axis_deg = float((np.degrees(np.angle(vec)) / 2.0) % 180.0) if vec != 0 else 0.0
+        # Dominant axis = length-weighted circular mean of doubled angles.
+        if axis_deg is None:
+            vec = sum(L * np.exp(2j * np.radians(a))
+                      for a, L in zip(angles, lengths_px) if a is not None)
+            axis_deg = float((np.degrees(np.angle(vec)) / 2.0) % 180.0) if vec != 0 else 0.0
 
-    long_len = trans_len = 0.0
-    for a, L, c in zip(angles, lengths_px, coords):
-        if a is None:
-            continue
-        rr, cc = c[:, 0].astype(int), c[:, 1].astype(int)
-        if _circ_dist(a, axis_deg) <= tol_deg:
-            long_len += L
-            long_mask[rr, cc] = True
-        elif _circ_dist(a, axis_deg + 90.0) <= tol_deg:
-            trans_len += L
-            trans_mask[rr, cc] = True
+        long_len = trans_len = 0.0
+        for a, L, c in zip(angles, lengths_px, coords):
+            if a is None:
+                continue
+            rr, cc = c[:, 0].astype(int), c[:, 1].astype(int)
+            if _circ_dist(a, axis_deg) <= tol_deg:
+                long_len += L
+                long_mask[rr, cc] = True
+            elif _circ_dist(a, axis_deg + 90.0) <= tol_deg:
+                trans_len += L
+                trans_mask[rr, cc] = True
+    except Exception:                              # skan can choke on degenerate skeletons
+        return degenerate
 
     return {
         "axis_deg": axis_deg,

@@ -13,11 +13,13 @@ def skeleton_metrics(mask: np.ndarray, pixel_size_um: float | None) -> dict:
     skel = skeletonize(mask)
     px_mm = (pixel_size_um or 1000.0) / 1000.0  # default keeps "mm" == "px" when uncalibrated
 
+    total_length_mm = 0.0
     if skel.sum() >= 2:
-        sk = Skeleton(skel.astype(np.uint8), spacing=px_mm)
-        total_length_mm = float(np.sum(sk.path_lengths()))
-    else:
-        total_length_mm = 0.0
+        try:
+            sk = Skeleton(skel.astype(np.uint8), spacing=px_mm)
+            total_length_mm = float(np.sum(sk.path_lengths()))
+        except Exception:                          # skan can choke on degenerate skeletons
+            total_length_mm = float(skel.sum()) * px_mm   # fall back to pixel-count length
 
     nbr = ndi.convolve(skel.astype(np.uint8), _NEIGHBORS, mode="constant")
     endpoints = skel & (nbr == 1)

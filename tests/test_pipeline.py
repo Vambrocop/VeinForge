@@ -26,3 +26,12 @@ def test_process_folder_outputs(tmp_path):
     df = pd.read_csv(out / "results.csv")
     assert {"sample_id", "position", "vein_density"}.issubset(df.columns)
     assert (df["vein_density"] > 0).all()
+
+
+def test_process_folder_empty_no_crash(tmp_path):
+    inp = tmp_path / "empty"; inp.mkdir()
+    out = tmp_path / "out"
+    rows = process_folder(inp, Params(pixel_size_um=2.0), out)
+    assert rows == []
+    assert (out / "results.csv").exists()
+    assert (out / "samples_summary.csv").exists()

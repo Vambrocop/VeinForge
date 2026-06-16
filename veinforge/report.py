@@ -17,6 +17,9 @@ def write_csv(rows: list[dict], path: str | Path) -> None:
 
 def write_summary(rows: list[dict], path: str | Path) -> None:
     df = pd.DataFrame(rows)
+    if df.empty or "sample_id" not in df.columns:
+        df.to_csv(path, index=False)            # nothing to aggregate; write empty file
+        return
     metrics = [m for m in _SUMMARY_METRICS if m in df.columns]
     agg = df.groupby("sample_id")[metrics].agg(["mean", "std"]).reset_index()
     agg.columns = ["sample_id"] + [f"{m}_{s}" for m, s in agg.columns[1:]]
